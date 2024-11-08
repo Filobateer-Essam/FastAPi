@@ -1,0 +1,147 @@
+[
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Response",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "Body",
+        "importPath": "fastapi.params",
+        "description": "fastapi.params",
+        "isExtraImport": true,
+        "detail": "fastapi.params",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "random",
+        "description": "random",
+        "isExtraImport": true,
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "Post",
+        "kind": 6,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "class Post(BaseModel):\n    title: str\n    content: str\n    published: bool = True\n    rating : Optional[int] = None\nmy_posts = [\n    {\n        \"title\": \"First Post\",\n        \"content\": \"This is the first post\",\n        \"id\" : 1",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "findpost",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def findpost(id):\n    for p in my_posts:\n        if p[\"id\"] == id:\n            return p\n@app.get(\"/\") # called decorator which is used to define the path of the API\ndef root():\n    return {\"message\": \"Hello, World!\"}\n# Get All Posts\n@app.get(\"/posts\")\ndef get_posts():",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "root",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def root():\n    return {\"message\": \"Hello, World!\"}\n# Get All Posts\n@app.get(\"/posts\")\ndef get_posts():\n    return {\"data\": my_posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")\ndef get_latest_post():\n    l_p = my_posts[len(my_posts) - 1]",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_posts",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_posts():\n    return {\"data\": my_posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")\ndef get_latest_post():\n    l_p = my_posts[len(my_posts) - 1]\n    return {\"latest_post\" :l_p }\n# Get ID of Post\n@app.get(\"/posts/{id}\")\ndef get_postID(id : int ):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_latest_post",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_latest_post():\n    l_p = my_posts[len(my_posts) - 1]\n    return {\"latest_post\" :l_p }\n# Get ID of Post\n@app.get(\"/posts/{id}\")\ndef get_postID(id : int ):\n    post = findpost(id)\n    if not post :\n        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_postID",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_postID(id : int ):\n    post = findpost(id)\n    if not post :\n        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)\n    return {\"post\": f\"the post {post}\"}\n@app.post(\"/posts\" ,status_code=status.HTTP_201_CREATED)\ndef create_post(new_post:Post):\n    print(new_post)\n    print(new_post.model_dump()) # Convert to json format",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "create_post",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def create_post(new_post:Post):\n    print(new_post)\n    print(new_post.model_dump()) # Convert to json format\n    post_dict = new_post.model_dump()\n    post_dict[\"id\"] = randrange(0,100000000)\n    my_posts.append(post_dict)  # Add new post to the list of posts\n    return {\"data\": post_dict}",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "app = FastAPI()\nclass Post(BaseModel):\n    title: str\n    content: str\n    published: bool = True\n    rating : Optional[int] = None\nmy_posts = [\n    {\n        \"title\": \"First Post\",\n        \"content\": \"This is the first post\",",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "my_posts",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "my_posts = [\n    {\n        \"title\": \"First Post\",\n        \"content\": \"This is the first post\",\n        \"id\" : 1\n    },\n    {\n        \"title\": \"Second Post\",\n        \"content\": \"This is the second post\",\n         \"id\" : 2",
+        "detail": "main",
+        "documentation": {}
+    }
+]
