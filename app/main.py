@@ -3,6 +3,9 @@ from fastapi import FastAPI , Response , status ,HTTPException
 from fastapi.params import Body
 from pydantic import BaseModel
 from random import *
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
 
 app = FastAPI()
 
@@ -11,7 +14,18 @@ class Post(BaseModel):
     title: str
     content: str
     published: bool = True
-    rating : Optional[int] = None
+
+
+try:
+    # Connect to database here
+    conn = psycopg2.connect(host='localhost',
+    database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)
+    cursor = conn.cursor()
+    print("Connect To Database Successfully 😎😎")
+except psycopg2.Error as e:
+    print("Unable to connect to the database")
+    print(e.pgerror)
+    print(e.diag.message_detail)
 
 my_posts = [
     {
@@ -81,8 +95,6 @@ def get_postID(id : int ):
         raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Post not found for id {id}")
     print(post)
     return {"post": post}
-
-
 
 @app.post("/posts" ,status_code=status.HTTP_201_CREATED)
 def create_post(new_post:Post):
