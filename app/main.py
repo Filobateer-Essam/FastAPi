@@ -5,28 +5,23 @@ from pydantic import BaseModel
 from random import *
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from Schemas.post_model import Post
+from Data.connection import Connection_DB
 
 
 app = FastAPI()
 
-
-class Post(BaseModel):
-    title: str
-    content: str
-    published: bool = True
-
-
+#----------------------------Connection DB------------------------------------
 try:
-    # Connect to database here
-    conn = psycopg2.connect(host='localhost',
-    database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)
-    cursor = conn.cursor()
-    print("Connect To Database Successfully 😎😎")
+        # Connect to database here
+        conn = psycopg2.connect(host='localhost',
+        database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)
+        cursor = conn.cursor()
+        print("Connect To Database Successfully 😎😎") 
+        
 except psycopg2.Error as e:
-    print("Unable to connect to the database")
-    print(e.pgerror)
-    print(e.diag.message_detail)
-
+       print (f"Unable to connect to the database {e.pgerror} , {e.diag.message_detail} ")
+       
 my_posts = [
     {
         "title": "First Post",
@@ -74,7 +69,9 @@ def root():
 # Get All Posts
 @app.get("/posts")
 def get_posts():
-    return {"data": my_posts}
+    cursor.execute(""" SELECT * FROM posts """)
+    posts = cursor.fetchall()
+    return {"data": posts}
 
 # Get the Latest Post
 @app.get("/posts/latest")
@@ -90,20 +87,26 @@ def get_latest_post():
 # Get ID of Post
 @app.get("/posts/{id}")
 def get_postID(id : int ):
-    post = findpost(id)
-    if not post :
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Post not found for id {id}")
+    cursor.execute(
+        """ SELECT * FROM posts WHERE id = %s """,
+        (id)
+    )
+    post = cursor.fetchone()
+    # post = findpost(id)
+    # if  not post :
+    #     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Post not found for id {id}")
     print(post)
     return {"post": post}
 
 @app.post("/posts" ,status_code=status.HTTP_201_CREATED)
 def create_post(new_post:Post):
-    print(new_post)
-    print(new_post.model_dump()) # Convert to json format
-    post_dict = new_post.model_dump()
-    post_dict["id"] = randrange(0,100000000)
-    my_posts.append(post_dict)  # Add new post to the list of posts
-    return {"data": post_dict}
+    cursor.execute(
+        """ INSERT INTO posts (title, content , published) VALUES (%s, %s, %s) RETURNING *""",
+        (new_post.title, new_post.content , new_post.published)
+    )
+    post = cursor.fetchone()
+    conn.commit()
+    return {"data": post}
 
 @app.delete("/posts/{id}")
 def delete_post(id : int):

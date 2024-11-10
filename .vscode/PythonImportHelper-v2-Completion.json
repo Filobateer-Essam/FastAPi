@@ -56,6 +56,14 @@
         "documentation": {}
     },
     {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
         "label": "*",
         "importPath": "random",
         "description": "random",
@@ -81,12 +89,27 @@
         "documentation": {}
     },
     {
+        "label": "RealDictCursor",
+        "importPath": "psycopg2.extras",
+        "description": "psycopg2.extras",
+        "isExtraImport": true,
+        "detail": "psycopg2.extras",
+        "documentation": {}
+    },
+    {
         "label": "Post",
-        "kind": 6,
-        "importPath": "app.main",
-        "description": "app.main",
-        "peekOfCode": "class Post(BaseModel):\n    title: str\n    content: str\n    published: bool = True\ntry:\n    # Connect to database here\n    conn = psycopg2.connect(host='localhost',\n    database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)\n    cursor = conn.cursor()\n    print(\"Connect To Database Successfully 😎😎\")",
-        "detail": "app.main",
+        "importPath": "Schemas.post_model",
+        "description": "Schemas.post_model",
+        "isExtraImport": true,
+        "detail": "Schemas.post_model",
+        "documentation": {}
+    },
+    {
+        "label": "Connection_DB",
+        "importPath": "Data.connection",
+        "description": "Data.connection",
+        "isExtraImport": true,
+        "detail": "Data.connection",
         "documentation": {}
     },
     {
@@ -112,7 +135,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def root():\n    return {\"message\": \"Hello, World!\"}\n# Get All Posts\n@app.get(\"/posts\")\ndef get_posts():\n    return {\"data\": my_posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")\ndef get_latest_post():\n    lst_posts = []",
+        "peekOfCode": "def root():\n    return {\"message\": \"Hello, World!\"}\n# Get All Posts\n@app.get(\"/posts\")\ndef get_posts():\n    cursor.execute(\"\"\" SELECT * FROM posts \"\"\")\n    posts = cursor.fetchall()\n    return {\"data\": posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")",
         "detail": "app.main",
         "documentation": {}
     },
@@ -121,7 +144,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def get_posts():\n    return {\"data\": my_posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")\ndef get_latest_post():\n    lst_posts = []\n    for i in range(len(my_posts) - 1, 1, -1):\n        lst_posts.append(my_posts[i])\n    print(lst_posts)\n    return {\"latest Posts\" : lst_posts}",
+        "peekOfCode": "def get_posts():\n    cursor.execute(\"\"\" SELECT * FROM posts \"\"\")\n    posts = cursor.fetchall()\n    return {\"data\": posts}\n# Get the Latest Post\n@app.get(\"/posts/latest\")\ndef get_latest_post():\n    lst_posts = []\n    for i in range(len(my_posts) - 1, 1, -1):\n        lst_posts.append(my_posts[i])",
         "detail": "app.main",
         "documentation": {}
     },
@@ -139,7 +162,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def get_postID(id : int ):\n    post = findpost(id)\n    if not post :\n        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)\n    return {\"post\": post}\n@app.post(\"/posts\" ,status_code=status.HTTP_201_CREATED)\ndef create_post(new_post:Post):\n    print(new_post)\n    print(new_post.model_dump()) # Convert to json format",
+        "peekOfCode": "def get_postID(id : int ):\n    cursor.execute(\n        \"\"\" SELECT * FROM posts WHERE id = %s \"\"\",\n        (id)\n    )\n    post = cursor.fetchone()\n    # post = findpost(id)\n    # if  not post :\n    #     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)",
         "detail": "app.main",
         "documentation": {}
     },
@@ -148,7 +171,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def create_post(new_post:Post):\n    print(new_post)\n    print(new_post.model_dump()) # Convert to json format\n    post_dict = new_post.model_dump()\n    post_dict[\"id\"] = randrange(0,100000000)\n    my_posts.append(post_dict)  # Add new post to the list of posts\n    return {\"data\": post_dict}\n@app.delete(\"/posts/{id}\")\ndef delete_post(id : int):\n    post = findpost(id)",
+        "peekOfCode": "def create_post(new_post:Post):\n    cursor.execute(\n        \"\"\" INSERT INTO posts (title, content , published) VALUES (%s, %s, %s) RETURNING *\"\"\",\n        (new_post.title, new_post.content , new_post.published)\n    )\n    post = cursor.fetchone()\n    conn.commit()\n    return {\"data\": post}\n@app.delete(\"/posts/{id}\")\ndef delete_post(id : int):",
         "detail": "app.main",
         "documentation": {}
     },
@@ -175,7 +198,7 @@
         "kind": 5,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "app = FastAPI()\nclass Post(BaseModel):\n    title: str\n    content: str\n    published: bool = True\ntry:\n    # Connect to database here\n    conn = psycopg2.connect(host='localhost',\n    database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)\n    cursor = conn.cursor()",
+        "peekOfCode": "app = FastAPI()\n#----------------------------Connection DB------------------------------------\ntry:\n        # Connect to database here\n        conn = psycopg2.connect(host='localhost',\n        database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)\n        cursor = conn.cursor()\n        print(\"Connect To Database Successfully 😎😎\") \nexcept psycopg2.Error as e:\n       print (f\"Unable to connect to the database {e.pgerror} , {e.diag.message_detail} \")",
         "detail": "app.main",
         "documentation": {}
     },
@@ -186,6 +209,24 @@
         "description": "app.main",
         "peekOfCode": "my_posts = [\n    {\n        \"title\": \"First Post\",\n        \"content\": \"This is the first post\",\n        \"id\" : 1\n    },\n    {\n        \"title\": \"Second Post\",\n        \"content\": \"This is the second post\",\n         \"id\" : 2",
         "detail": "app.main",
+        "documentation": {}
+    },
+    {
+        "label": "Connection_DB",
+        "kind": 2,
+        "importPath": "Data.connection",
+        "description": "Data.connection",
+        "peekOfCode": "def Connection_DB():\n    try:\n        # Connect to database here\n        conn = psycopg2.connect(host='localhost',\n        database = 'fastapi', user = 'postgres' , password = 'sniper1',cursor_factory= RealDictCursor)\n        cursor = conn.cursor()\n        print(\"Connect To Database Successfully 😎😎\") \n        return cursor\n    except psycopg2.Error as e:\n       return f\"Unable to connect to the database {e.pgerror} , {e.diag.message_detail} \"",
+        "detail": "Data.connection",
+        "documentation": {}
+    },
+    {
+        "label": "Post",
+        "kind": 6,
+        "importPath": "Schemas.post_model",
+        "description": "Schemas.post_model",
+        "peekOfCode": "class Post(BaseModel):\n    title: str\n    content: str\n    published: bool = True",
+        "detail": "Schemas.post_model",
         "documentation": {}
     }
 ]
