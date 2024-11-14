@@ -162,7 +162,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def get_postID(id : int ):\n    cursor.execute(\n        \"\"\" SELECT * FROM posts WHERE id = %s \"\"\",\n        (id)\n    )\n    post = cursor.fetchone()\n    # post = findpost(id)\n    # if  not post :\n    #     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)",
+        "peekOfCode": "def get_postID(id : int ):\n    cursor.execute(\n        \"\"\" SELECT * FROM posts WHERE id = %s \"\"\",\n        (str(id,))\n    )\n    post = cursor.fetchone()\n    # post = findpost(id)\n    if not post :\n        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f\"Post not found for id {id}\")\n    print(post)",
         "detail": "app.main",
         "documentation": {}
     },
@@ -180,7 +180,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def delete_post(id : int):\n    post = findpost(id)\n    post_index = findIndexArr(id)\n    print(post_index)\n    if post not in my_posts:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f\"Post not found for id {id}\")\n    my_posts.remove(post)\n    return {\"detail\": f\"Post index in Array is {post_index} with id {id}  has been deleted.\"}\n@app.put(\"/posts/{id}\")\ndef update_post(id : int , post: Post):",
+        "peekOfCode": "def delete_post(id : int):\n    # post = findpost(id)\n    # post_index = findIndexArr(id)\n    # print(post_index)\n    cursor.execute(\n        \"\"\" DELETE FROM posts WHERE id = %s returning * \"\"\",\n        (str(id),)\n    )\n    delete_post = cursor.fetchone()\n    conn.commit()",
         "detail": "app.main",
         "documentation": {}
     },
@@ -189,7 +189,7 @@
         "kind": 2,
         "importPath": "app.main",
         "description": "app.main",
-        "peekOfCode": "def update_post(id : int , post: Post):\n    post_index = findIndexArr(id)\n    print(post_index) # the place in the Array not the actual id\n    post_withID = findpost(id)\n    if post_withID not in my_posts:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f\"Post not found for id {id}\")\n    else:\n        # must convert th e Object into Dic first \n        post_dict = post.model_dump()\n        post_dict[\"id\"] = id  # replace id with the actual id",
+        "peekOfCode": "def update_post(id : int , post: Post):\n    cursor.execute(\n        \"\"\" UPDATE posts SET title=%s, content=%s, published=%s WHERE id=%s RETURNING * \"\"\",\n        (post.title, post.content, post.published, str(id))\n    )\n    post = cursor.fetchone()\n    if not post:\n        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f\"Post not found for id {id}\")\n    conn.commit()\n    return {\"data\": post}",
         "detail": "app.main",
         "documentation": {}
     },

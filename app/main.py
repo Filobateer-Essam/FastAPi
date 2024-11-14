@@ -89,12 +89,12 @@ def get_latest_post():
 def get_postID(id : int ):
     cursor.execute(
         """ SELECT * FROM posts WHERE id = %s """,
-        (id)
+        (str(id,))
     )
     post = cursor.fetchone()
     # post = findpost(id)
-    # if  not post :
-    #     raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Post not found for id {id}")
+    if not post :
+        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail= f"Post not found for id {id}")
     print(post)
     return {"post": post}
 
@@ -110,32 +110,32 @@ def create_post(new_post:Post):
 
 @app.delete("/posts/{id}")
 def delete_post(id : int):
-    post = findpost(id)
-    post_index = findIndexArr(id)
-    print(post_index)
-    if post not in my_posts:
+    # post = findpost(id)
+    # post_index = findIndexArr(id)
+    # print(post_index)
+    cursor.execute(
+        """ DELETE FROM posts WHERE id = %s returning * """,
+        (str(id),)
+    )
+    delete_post = cursor.fetchone()
+    
+    conn.commit()
+    
+    if delete_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post not found for id {id}")
-    my_posts.remove(post)
-    return {"detail": f"Post index in Array is {post_index} with id {id}  has been deleted."}
+    
+    return {"deleted Post": f"Post has been deleted."}
 
 @app.put("/posts/{id}")
 def update_post(id : int , post: Post):
+    cursor.execute(
+        """ UPDATE posts SET title=%s, content=%s, published=%s WHERE id=%s RETURNING * """,
+        (post.title, post.content, post.published, str(id))
+    )
     
-    post_index = findIndexArr(id)
-    print(post_index) # the place in the Array not the actual id
     
-    post_withID = findpost(id)
-    
-    if post_withID not in my_posts:
+    post = cursor.fetchone()
+    if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Post not found for id {id}")
-    
-    else:
-        # must convert th e Object into Dic first 
-        post_dict = post.model_dump()
-        post_dict["id"] = id  # replace id with the actual id
-        
-        # update the post in the list
-        my_posts[post_index] = post_dict
-        return {"data": post_dict}
-        
-        
+    conn.commit()
+    return {"data": post}
